@@ -20,7 +20,7 @@ dependencies = [
     "gazpacho>=1.1",
     "pdf2image>=1.17.0",
     "pillow>=11.3.0",
-    "pymupdf>=1.27.1",
+    "pymupdf>=1.27.2.2",
     "python-docx>=1.2.0",
     "docxcompose>=2.0.1",
 ]
