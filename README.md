@@ -1,9 +1,9 @@
-# Stata Project Template for Reproducible Research
+# Tech Hubs Session 8: AI Applications in Research
 
-A template repository for reproducible Stata analysis projects using modern workflow
-tools and best practices. This template integrates **IPA's Data Cleaning Guide** and
-Stata coding standards with established practices from leading development economics
-research groups.
+A hands-on training repository for IPA Research Associates and Research Managers.
+This session teaches **AI-assisted data cleaning in Stata** using GitHub Copilot
+inside VS Code, built on top of the
+[IPA Stata Template](https://github.com/PovertyAction/ipa-stata-template).
 
 > [!WARNING]
 > NEVER COMMIT DATA FILES TO GITHUB.
@@ -11,44 +11,28 @@ research groups.
 > NEVER USE AI ASSISTANTS WITH PERSONALLY IDENTIFIABLE DATA.
 >
 > YOU ARE REQUIRED TO REMOVE IDENTIFYING INFORMATION **BEFORE** CONNECTING AI
->
 > ASSISTANTS OR STORING IN ANY UNENCRYPTED LOCATION.
+>
+> This training uses **synthetic data only**. No real survey data should ever be
+> committed to this repository.
 
-## Use This Template
+---
 
-If you want to use this template for your own project:
-
-1. Click the green **Use this template** button at the top of this page
-2. Select **Create a new repository**
-3. On the "Create a new repository" page:
-   1. Start with a template: `PovertyAction/ipa-stata-template`
-   2. Include all branches: Off
-   3. Select Owner, Repository name, Description, and Configuration as desired.
-4. Click the green **Create repository** button.
-
-## Quick Start (Minimal Setup)
-
-> [!TIP]
-> If you are new to this repository, start here but be sure to read the full README
-> as well as the [Getting Started Guide](./documentation/getting-started.md).
-
-Get started with just **Git** and **Stata** - no additional tools required.
+## Quick Start
 
 ### Prerequisites
 
-- Git installed ([download](https://git-scm.com/))
-    - Windows: `winget install --id Git.Git -e`
-    - macOS: `brew install git`
-    - Linux: Use your package manager, e.g., `sudo apt install git`, `brew install git`
-- Stata 17+ installed and licensed
+- Git ([download](https://git-scm.com/))
+- Stata 17+
+- VS Code with the [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) extension
 
 ### Steps
 
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/PovertyAction/ipa-stata-template.git
-   cd ipa-stata-template
+   git clone <repo-url>
+   cd ai-assisted-data-cleaning
    ```
 
 2. **Configure your Stata path**
@@ -62,210 +46,224 @@ Get started with just **Git** and **Stata** - no additional tools required.
 
    # macOS example
    # STATA_CMD='/Applications/Stata/StataSE.app/Contents/MacOS/StataSE'
-
-   # Linux example
-   # STATA_CMD='/usr/local/stata18/stata-se'
    ```
 
-3. **One-time setup** (install `setroot` package)
+3. **One-time setup** (installs `setroot` and all required packages)
 
    ```bash
-   # From command line - run once to install dependencies
    just stata-setup
-
-   # Or from Stata directly:
-   do setup.do
+   # or from Stata directly:
+   # do setup.do
    ```
 
-4. **Run the analysis pipeline**
+4. **Generate the synthetic training dataset** (run once)
+
+   In Stata, from the project root:
+
+   ```stata
+   do setup/generate_synthetic_data.do
+   ```
+
+   This creates `data/raw/household_survey_raw.dta` — a synthetic household
+   survey with 500 observations and intentional data quality issues.
+
+5. **Run the training pipeline**
 
    ```bash
    # Full pipeline
    just stata-run
 
-   # Or run a single script
-   just stata-script 01_data_cleaning
-
-   # Or open Stata and run directly
-   # IMPORTANT: First change to the project directory in Stata:
-   cd ~/code/ipa-stata-template
+   # Or from Stata directly
    do do_files/00_run.do
-   do do_files/00_run.do "01_data_cleaning"  // single script
+
+   # Run a single module
+   just stata-script 02_string_cleaning
+   # or: do do_files/00_run.do "02_string_cleaning"
    ```
 
-   > [!TIP]
-   > If you get a "Root folder of project not found" error, make sure you've changed
-   > to the project directory in Stata using `cd ~/code/ipa-stata-template` before
-   > running the do-file.
+6. **Check outputs**
 
-5. **Check outputs**
-
-   - Tables: `outputs/tables/`
-   - Figures: `outputs/figures/`
+   - CSV exports: `outputs/`
+   - Codebook: `outputs/codebook.xlsx`
    - Logs: `logs/`
+   - Final clean dataset: `data/final/hh_clean_final.dta`
 
-That's it! You now have a reproducible Stata workflow.
+---
 
-### How Path Resolution Works
+## Training Modules
 
-The template uses `setroot` to automatically find the project root by looking for
-a `.here` marker file. This means:
+The pipeline consists of five modules, each designed as a hands-on Copilot
+exercise. Every module contains `// TODO` comments and `* COPILOT PROMPT:`
+comments with ready-to-use natural language prompts.
 
-- **No `c(pwd)` dependency** - scripts work regardless of where Stata is launched
-- **No user-specific `if c(user)` blocks** - paths resolve automatically
-- **Full adopath isolation** - only BASE + local `ado/` for reproducibility
-- **Runner pattern** - run individual scripts with proper environment setup
+| Module | File | Topic |
+|--------|------|-------|
+| 01 | `do_files/01_data_cleaning.do` | Load data, inspect quality, check identifiers |
+| 02 | `do_files/02_string_cleaning.do` | Trim spaces, title case, standardise categories |
+| 03 | `do_files/03_deduplication.do` | Detect and resolve duplicate records |
+| 04 | `do_files/04_outliers_flags.do` | IQR outlier flagging, winsorisation, `.o` recoding |
+| 05 | `do_files/05_labeling_codebook.do` | Variable labels, value labels, codebook export |
 
-### Separating Code and Data Paths
+### How Each Module Works
 
-The template supports storing code and data in **separate locations**. This is useful when:
+Each module:
 
-- Data is stored in a Cryptomator vault
-- Data is synced via Box/Dropbox/OneDrive to different locations on each machine
-- Multiple team members work from different directory structures
-- You want to keep large data files outside your git repository
-
-#### Setup for Separate Data Storage
-
-1. **Copy the template file**:
-
-    ```bash
-    # Windows Command Prompt or bash
-    cp config.do.template config.do
-
-    # Windows PowerShell
-
-    Copy-Item config.do.template config.do
-    ```
-
-    > [!IMPORTANT]
-    > **Never commit `config.do`** - it's gitignored for a reason (contains user-specific paths).
-    > Always commit `config.do.template` so others know how to configure theirs.
-
-2. **Edit `config.do`** to set your data path:
-
-    ```stata
-    // Example: Dropbox
-    global data_root "C:/Users/YourName/Dropbox/Research/ProjectName/data"
-
-    // Example: External drive (macOS)
-    global data_root "/Volumes/ExternalDrive/research-data/ProjectName"
-    ```
-
-3. **Run your analysis** as usual - paths are resolved automatically:
-
-    ```bash
-    just stata-run
-    ```
-
-#### Default Behavior (Everything Together)
-
-If you don't create a `config.do` file, the template uses default paths:
-
-```stata
-data/raw/     -> [project_root]/data/raw/
-data/clean/   -> [project_root]/data/clean/
-data/final/   -> [project_root]/data/final/
-```
-
-#### Path Variables Reference
-
-After setup, these globals are available in all scripts:
-
-**Data paths** (customizable via `config.do`):
-
-- `${data_root}` - Root of all data folders
-- `${data_raw}` - Raw/original data
-- `${data_clean}` - Cleaned data
-- `${data_final}` - Final analysis datasets
-
-**Code/output paths** (always in project root):
-
-- `${project_path}` - Project root (from setroot)
-- `${scripts}` - Do-files directory
-- `${outputs}` - All outputs
-- `${tables}` - Regression tables
-- `${figures}` - Figures and graphs
-- `${logs}` - Log files
-
-> [!TIP]
-> **Want more automation?** See [Advanced Setup](#advanced-setup) below for:
->
-> - `just` task runner for common commands
-> - `scons` for dependency tracking (rebuild only what changed)
-> - `nbstata` for running Stata interactively in VS Code
-> - Pre-commit hooks for automatic code quality checks
+1. **Runs standalone** — includes an initialisation block that sets up paths if
+   the module is run directly, without going through `00_run.do`
+2. **Runs as part of the pipeline** — `00_run.do` calls each module in sequence
+3. **Contains TODOs** — blank sections where participants write Copilot-assisted code
+4. **Contains COPILOT PROMPT comments** — copy the plain-English prompt into
+   Copilot Chat or let inline Copilot autocomplete the code
 
 ---
 
 ## Project Structure
 
 ```text
-├── README.md                           # Important information about the project. Keep this updated, provide additional documentation as needed in `/documentation`.
-├── .here                               # Project root marker (for setroot)
-├── .env                                # Stata configuration (gitignored) (copy from .env-example)
+├── README.md                           # This file
+├── CLAUDE.md                           # AI assistant instructions and conventions
+├── .here                               # Project root marker (used by setroot)
+├── .env                                # Stata executable config (gitignored — copy from .env-example)
+├── .env-example                        # Template for .env
 ├── config.do.template                  # Template for user-specific data paths
-├── config.do                           # User-specific data paths (gitignored) (copy from config.do.template)
-├── .config/                            # Configuration files for packages and tools
-│   ├── quarto/                         # Config for Quarto formatting Quarto Markdown documents
-│   └── stata/                          # Stata package requirements
-│       ├── install_packages.do         # Script to install required Stata packages
-│       └── stata_requirements.txt      # List of required Stata packages
-├── setup.do                            # One-time setup script
-├── data/                               # Data files (DO NOT COMMIT SENSITIVE DATA OR LARGE FILES TO GIT/GITHUB)
-│   ├── raw/                            # Original, immutable data files
-│   ├── clean/                          # Cleaned data (intermediate)
-│   └── final/                          # Analysis-ready datasets
-├── do_files/                           # Stata do-files (files here are illustrative; actual do-files may vary)
-│   ├── 00_run.do                       # Master do-file (controls pipeline + runner)
-│   ├── 01_data_cleaning.do
-│   ├── 02_data_preparation.do
-│   ├── 03_descriptive_analysis.do
-│   ├── 04_main_analysis.do
-│   ├── 05_robustness_checks.do
-│   ├── 06_generate_figures.do
-│   └── functions.do                # Reusable helper functions
-├── ado/                                # Local Stata packages (for reproducibility)
-├── outputs/
-│   ├── figures/                        # Figures (.pdf, .png files)
-│   └── tables/                         # Regression tables (.tex, .md files)
-├── logs/                               # Log files from Stata runs (should be gitignored)
-├── reports/                            # Generate reports (e.g., Quarto, LaTeX)
-├── src/                                # Additional scripts (e.g., Python for data processing)
-└── documentation/                      # Project documentation
+├── config.do                           # User-specific paths (gitignored — copy from template)
+├── setup.do                            # One-time setup: installs setroot + packages
+│
+├── setup/
+│   └── generate_synthetic_data.do      # Generates synthetic training data (run once)
+│
+├── do_files/                           # Stata do-files
+│   ├── 00_run.do                       # Master runner (controls pipeline + single-module mode)
+│   ├── 01_data_cleaning.do             # MODULE 01: Load data, quality checks, identifier validation
+│   ├── 02_string_cleaning.do           # MODULE 02: String standardisation
+│   ├── 03_deduplication.do             # MODULE 03: Duplicate detection and resolution
+│   ├── 04_outliers_flags.do            # MODULE 04: Outlier detection and flagging
+│   ├── 05_labeling_codebook.do         # MODULE 05: Variable labels and codebook
+│   └── functions.do                    # Reusable helper functions (from IPA template)
+│
+├── data/
+│   ├── raw/                            # Raw input data (read-only after generation)
+│   │   └── household_survey_raw.dta    # Synthetic training dataset (generated by setup/)
+│   ├── intermediate/                   # Intermediate files produced by modules 01–04
+│   └── final/                          # Final clean dataset (produced by module 05)
+│
+├── outputs/                            # All exported outputs
+│   ├── missing_summary.csv             # From module 01
+│   ├── dedup_log.csv                   # From module 03
+│   ├── flag_summary.csv                # From module 04
+│   └── codebook.xlsx                   # From module 05
+│
+├── logs/                               # Timestamped Stata log files
+├── ado/                                # Local Stata packages (installed by setup.do)
+│
+├── .config/
+│   ├── stata/
+│   │   ├── stata_requirements.txt      # Stata package list (installed via require)
+│   │   └── install_packages.do         # Package installation script
+│   └── quarto/                         # Quarto formatting configuration
+│
+└── .github/
+    └── workflows/                      # CI workflows (code review, pre-commit)
 ```
 
-### Understanding `00_run.do`
+---
 
-The master do-file orchestrates your entire analysis pipeline. It uses control switches to run specific sections:
+## Path Resolution and Globals
+
+### How It Works
+
+The project uses [`setroot`](https://github.com/sergiocorreia/setroot) to
+automatically locate the project root from any directory by searching upward for
+the `.here` marker file. This means:
+
+- **No hardcoded paths** — scripts work regardless of where Stata is launched
+- **No `if c(user)` blocks** — paths resolve automatically for every team member
+- **Reproducible adopath** — only BASE + local `ado/` directory
+
+### Global Path Variables
+
+After `00_run.do` runs, these globals are available in all modules:
+
+| Global | Default | Purpose |
+|--------|---------|---------|
+| `${project_path}` | (from setroot) | Project root directory |
+| `${data}` | `${project_path}/data` | Data root folder |
+| `${logs}` | `${project_path}/logs` | Log files |
+| `${outputs}` | `${project_path}/outputs` | All exported outputs |
+| `${scripts}` | `${project_path}/do_files` | Do-files directory |
+| `${today}` | (from `c(current_date)`) | Date stamp for log file names |
+
+Data sub-folders (never define these separately — always construct from `${data}`):
 
 ```stata
-// Change to 0 to skip during development
-local data_cleaning         = 1
-local data_preparation      = 1
-local descriptive_analysis  = 1
-local main_analysis         = 1
-local robustness_checks     = 1
-local generate_figures      = 1
+"${data}/raw/"           // raw input data
+"${data}/intermediate/"  // intermediate processed files
+"${data}/final/"         // clean, analysis-ready datasets
 ```
 
-This allows you to quickly iterate on specific parts without re-running everything.
+### Separating Code and Data
+
+If your data lives outside the repo (Dropbox, shared drive, Cryptomator vault):
+
+1. Copy the template:
+
+   ```bash
+   cp config.do.template config.do
+   ```
+
+2. Edit `config.do` to set your paths:
+
+   ```stata
+   global data    "C:/Users/YourName/Dropbox/Project/data"
+   global logs    ""   // leave blank to use project root default
+   global outputs ""   // leave blank to use project root default
+   ```
+
+3. Run as usual — `00_run.do` loads `config.do` automatically.
+
+> [!IMPORTANT]
+> **Never commit `config.do`** — it is gitignored because it contains
+> machine-specific paths. Always commit `config.do.template`.
+
+---
+
+## Understanding `00_run.do`
+
+The master do-file orchestrates the training pipeline. It uses control switches
+to run specific modules:
+
+```stata
+// Set to 0 to skip a module during development
+local run_01_data_cleaning     = 1
+local run_02_string_cleaning   = 1
+local run_03_deduplication     = 1
+local run_04_outliers_flags    = 1
+local run_05_labeling_codebook = 1
+```
+
+**Runner pattern** — pass a module name to run only that one:
+
+```stata
+do do_files/00_run.do "03_deduplication"
+```
+
+Or with `just`:
+
+```bash
+just stata-script 03_deduplication
+```
+
+> [!TIP]
+> If you get a "Root folder of project not found" error, change to the project
+> directory in Stata first: `cd /path/to/repo` then re-run.
 
 ---
 
 ## Advanced Setup
 
-For teams wanting additional automation, code quality tools, and VS Code integration.
+### Task Runner (`just`)
 
-### Prerequisites for Advanced Features
-
-- Everything from Quick Start, plus:
-- `just` command runner ([install](https://github.com/casey/just#installation))
-- For full setup: `uv` Python manager, Node.js (for linting)
-
-### Option A: Task Runner Only (+just)
-
-Install `just` and use simple commands instead of typing full Stata paths:
+Install `just` to run common tasks with short commands:
 
 ```bash
 # Windows
@@ -275,193 +273,92 @@ winget install --id Casey.Just -e
 brew install just
 ```
 
-Now you can run:
+Available commands:
 
 ```bash
-just stata-setup                    # One-time setup (install setroot + packages)
-just stata-run                      # Run the full pipeline
-just stata-script 01_data_cleaning  # Run a single script
-just stata-config                   # Show your Stata configuration
-just help                           # See available commands
+just stata-setup                      # One-time setup (install setroot + packages)
+just stata-run                        # Run full training pipeline
+just stata-script 02_string_cleaning  # Run a single module
+just stata-config                     # Show Stata configuration
+just lint-stata                       # Lint all do-files with stata_linter
+just fmt-markdown                     # Format Markdown files
+just help                             # See all available commands
 ```
 
-### Option B: Full Development Environment
+### Full Development Environment
 
-For the complete setup including Python tools, nbstata, and pre-commit hooks:
+For Python tools, pre-commit hooks, and Quarto:
 
 ```bash
 just get-started
 ```
 
-This installs:
-
-- `uv` for Python environment management
-- `Git` for version control
-- `GitHub CLI` for interaction with GitHub
-- `Quarto` for reports and presentations
-- `markdownlint-cli2` for Markdown formatting
-- Python virtual environment with `nbstata` (run Stata in VS Code/Jupyter)
-- Stata packages from `.config/stata/stata_requirements.txt`
-
-After installation, verify your setup:
-
-```bash
-just stata-check-installation
-```
+This installs: `uv` (Python), `Quarto`, `markdownlint-cli2`, `nbstata` (Stata
+in VS Code/Jupyter), and all Stata packages.
 
 ### VS Code Integration with nbstata
 
-For interactive Stata execution in VS Code (similar to Ctrl+D workflow):
+Run Stata interactively in VS Code (similar to the Ctrl+D workflow):
 
 1. Install the [vscode-stata](https://marketplace.visualstudio.com/items?itemName=kylebutts.vscode-stata) extension
-2. Test with demo files in `do_files/demo/`
-3. Select the nbstata kernel at `.venv/Scripts/python.exe` (Windows) or `.venv/bin/python` (macOS/Linux)
+2. Select the nbstata kernel at `.venv/Scripts/python.exe` (Windows) or `.venv/bin/python` (macOS/Linux)
+3. Test with the demo files in `do_files/demo/`
 
-See the [nbstata User Guide](https://hugetim.github.io/nbstata/user_guide.html) for details.
+### Dependency Tracking with scons
 
-### Dependency Tracking with scons (Advanced)
-
-For large projects where full rebuilds take >5 minutes, use `scons` to only rebuild changed files:
+For projects where full rebuilds take more than a few minutes:
 
 ```bash
-just stata-build        # Build with dependency tracking
-just stata-data         # Build only data pipeline
-just stata-analysis     # Build only analysis
-just stata-clean        # Clean all outputs
+just stata-build    # Only rebuild files whose inputs changed
+just stata-clean    # Remove all outputs
 ```
-
-The `SConstruct` file defines dependencies between do-files and their outputs. When you modify `01_data_cleaning.do`, scons knows to re-run downstream scripts but not unrelated ones.
-
-> [!NOTE]
-> For most projects, the simple `00_run.do` approach is sufficient. Only adopt scons
-> if you have genuinely slow builds that would benefit from incremental rebuilding.
 
 ---
 
-## Best Practices Built In
+## IPA Coding Standards
 
-### Workflow Features
+All do-files in this repository follow IPA Stata standards:
 
-- **IPA Data Standards**: Follows IPA Data Cleaning Guide and Stata coding best practices
-- **Defensive programming**: Uses assert statements and quality checks throughout
-- **Extended missing values**: Implements IPA's .d/.o/.n/.r/.s conventions
-- **Reproducible package management**: Requirements-based Stata package installation
-- **Comprehensive logging**: All Stata runs generate detailed log files
-- **Publication-ready outputs**: Tables in LaTeX format, figures in PDF
-
-### Stata Package Management
-
-```bash
-# Install all required packages from requirements file
-just stata-install-packages
-```
-
-Packages are listed in `.config/stata/stata_requirements.txt`.
-
-### Code Quality with stata_linter
-
-```bash
-just lint-stata                                    # Lint all do-files
-just lint-stata-file do_files/01_data_cleaning.do  # Lint specific file
-```
-
-Reports saved to `logs/stata_linter_report.xlsx`.
-
-### IPA Visualizations (for IPA Staff)
-
-```stata
-net install github, from("https://haghish.github.io/github/")
-github install PovertyAction/ipaplots
-```
-
-The template automatically uses IPA branding when `ipaplots` is available.
+- **Path management** via `setroot` and `${data}` globals — no hardcoded paths
+- **Standard file header** with project name, file, purpose, author, date
+- **Log open/close** in every script using `${logs}` and `${today}`
+- **IPA extended missing values**: `.d` (don't know), `.r` (refused), `.n` (not applicable), `.o` (other/out of range), `.s` (skipped)
+- **Defensive programming**: `assert`, `isid`, and merge validation throughout
+- **Package management** via `.config/stata/stata_requirements.txt` — no `ssc install` in do-files
 
 ---
 
 ## Troubleshooting
 
-**Command not found errors:**
+**`setroot` not found** — Run `do setup.do` first to install required packages.
 
-- Verify Stata path in `.env` file
-- Ensure quotes around paths with spaces (Windows)
+**"Root folder not found" error** — Change to the project directory in Stata
+(`cd /path/to/repo`) before running `do do_files/00_run.do`.
 
-**Permission errors (macOS/Linux):**
+**`household_survey_raw.dta` not found** — Run
+`do setup/generate_synthetic_data.do` from the project root first.
 
-- Check file permissions on Stata executable
+**Stata path errors** — Check your `.env` file; ensure paths with spaces are
+quoted.
 
-**Batch mode issues:**
+**Package not found** — Run `just stata-setup` (or `do setup.do`) to install
+all packages listed in `.config/stata/stata_requirements.txt`.
 
-- Ensure your Stata license supports batch processing
+---
 
-## Acknowledgments and References
+## Acknowledgments
 
-This template builds upon established best practices and tools from the development economics and data science communities:
+This training is built on the [IPA Stata Template](https://github.com/PovertyAction/ipa-stata-template)
+and the following resources:
 
-### Primary Guidelines and Standards
-
-- **IPA Data Cleaning Guide** ([Website](https://data.poverty-action.org/data-cleaning/)): Comprehensive guide for data cleaning best practices
-    - Organization: Innovations for Poverty Action (IPA)
-    - Covers: Raw data management, variable management, dataset documentation, data aggregation
-
-- **IPA Stata Tutorials** ([Website](https://data.poverty-action.org/software/stata/)): Stata coding standards and best practices
-    - Organization: Innovations for Poverty Action (IPA)
-    - Covers: Stata syntax, data processing, coding standards
-
-- **Data Carpentry Stata Economics** ([Website](https://datacarpentry.github.io/stata-economics/)): Research-grade Stata programming curriculum
-    - Organization: Data Carpentry
-    - Covers: Data exploration, quality assessment, transformation, combination, programming, loops, advanced techniques
-    - License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
-
-### Core Dependencies
-
-- **ipaplots** ([GitHub](https://github.com/PovertyAction/ipaplots)): IPA-branded Stata graphing scheme
-    - Authors: Ronny Condor, Kelly Montaño (IPA Peru)
-    - Organization: Innovations for Poverty Action
-    - Features: Professional visualization theme with IPA branding
-
-- (Optional) **statacons** ([GitHub](https://github.com/bquistorff/statacons) | [Documentation](https://bquistorff.github.io/statacons/)): Python package for managing Stata workflows
-    - Authors: Brian Quistorff and colleagues
-    - License: [MIT License](https://github.com/bquistorff/statacons/blob/main/LICENSE)
-
-### Coding Standards and Best Practices
-
-- **Sean Higgins Stata Guide** ([GitHub](https://github.com/skhiggins/Stata_guide)): Comprehensive coding style and workflow recommendations
-    - Author: Sean Higgins
-    - License: Creative Commons
-
-- **DIME Analytics Data Handbook** ([Website](https://worldbank.github.io/dime-data-handbook/coding.html)): World Bank DIME team coding standards
-    - Organization: World Bank Development Impact Evaluation (DIME)
-    - License: [MIT License](https://github.com/worldbank/dime-data-handbook/blob/main/LICENSE)
-
-- **World Bank Reproducible Research Repository** ([GitHub](https://github.com/worldbank/wb-reproducible-research-repository)): Guidelines for reproducible research
-    - Organization: World Bank
-    - License: [Mozilla Public License 2.0](https://github.com/worldbank/wb-reproducible-research-repository/blob/main/LICENSE)
-- **Code and Data for the Social Sciences: A Practitioner's Guide** ([Website](https://web.stanford.edu/~gentzkow/research/CodeAndData.pdf)): Stata coding style guide
-    - Authors: Matthew Gentzkow and Jesse M. Shapiro
-    - Copyright (c) 2014, Matthew Gentzkow and Jesse M. Shapiro.
-
-### Development Tools
-
-- **uv** ([Documentation](https://docs.astral.sh/uv/)): Fast Python package installer and resolver
-- **Just** ([GitHub](https://github.com/casey/just)): Command runner for development tasks
-- **Quarto** ([Website](https://quarto.org/)): Scientific and technical publishing system
-
-### Advance Workflow with SCons
-
-#### **Automated Build System (Recommended)** - `SConstruct`
-
-```bash
-just stata-full     # Complete pipeline with build system
-# OR use scons directly:
-scons              # Builds entire analysis pipeline
-scons data         # Builds only data cleaning/preparation
-scons analysis     # Builds only analysis outputs
-scons figures      # Builds only figures
-scons -c           # Clean all outputs
-```
+- **IPA Data Cleaning Guide** — [data.poverty-action.org/data-cleaning](https://data.poverty-action.org/data-cleaning/)
+- **IPA Stata Coding Standards** — [data.poverty-action.org/software/stata](https://data.poverty-action.org/software/stata/)
+- **Data Carpentry: Stata for Economics** — [datacarpentry.github.io/stata-economics](https://datacarpentry.github.io/stata-economics/) (CC BY 4.0)
+- **DIME Analytics Data Handbook** — [worldbank.github.io/dime-data-handbook](https://worldbank.github.io/dime-data-handbook/coding.html)
+- **Sean Higgins Stata Guide** — [github.com/skhiggins/Stata_guide](https://github.com/skhiggins/Stata_guide)
+- **ipaplots** — [github.com/PovertyAction/ipaplots](https://github.com/PovertyAction/ipaplots)
+- **statacons** — [bquistorff.github.io/statacons](https://bquistorff.github.io/statacons/) (MIT)
 
 ## License
 
-This template is released under the MIT License. See [LICENSE](LICENSE) for details.
-
-While this template is MIT licensed, please respect the licenses of the constituent tools and respect the intellectual contributions of the referenced guides and best practices.
+Released under the MIT License. See [LICENSE](LICENSE) for details.
