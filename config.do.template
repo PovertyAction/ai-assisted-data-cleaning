@@ -1,47 +1,39 @@
 /*==============================================================================
-USER-SPECIFIC CONFIGURATION TEMPLATE
+  USER-SPECIFIC CONFIGURATION TEMPLATE
 ================================================================================
 
-Instructions:
-1. Copy this file to config.do:
-   - Windows: copy config.do.template config.do
-   - macOS/Linux: cp config.do.template config.do
+  Instructions:
+  1. Copy this file to config.do:
+       Windows:      copy config.do.template config.do
+       macOS/Linux:  cp config.do.template config.do
 
-2. Edit config.do to set your local data path
+  2. Edit config.do to set your local paths.
 
-3. config.do is gitignored - never commit it to version control
+  3. config.do is gitignored — never commit it to version control.
 
-Note: If config.do doesn't exist, the template defaults to data/ in project root
+  Note: If config.do doesn't exist, 00_run.do defaults to the data/, logs/,
+        and outputs/ folders inside the project root.
 
 ==============================================================================*/
 
 /*------------------------------------------------------------------------------
-    DATA PATH CONFIGURATION
+    REQUIRED: Set the path to the data folder
+    (can be inside the repo or on a separate drive / shared folder)
 ------------------------------------------------------------------------------*/
 
-// OPTION 1: Data stored separately from code (RECOMMENDED for shared drives)
-// Uncomment and edit the path below:
+global data    ""   // path to the data/ folder
+                    // e.g. "C:/Users/YourName/Dropbox/Project/data"
+                    // Leave blank to use the default: <project root>/data
 
-// global data_root "X:/SECURE_AREA_12345_project_name_country/data"
-// global data_root "D:/Dropbox/ProjectName/data"
-// global data_root "/mnt/network-drive/research/ProjectName/data"
-// global data_root "C:/Users/YourName/Documents/Research/ProjectName/data"
+global logs    ""   // path to the logs/ folder
+                    // Leave blank to use the default: <project root>/logs
 
-/*------------------------------------------------------------------------------
-    ADVANCED: Override individual data folders
-------------------------------------------------------------------------------*/
-
-// If you only want to override specific folders, uncomment and edit:
-
-// global data_raw "${data_root}/raw"
-// global data_clean "${data_root}/clean"
-// global data_final "${data_root}/final"
+global outputs ""   // path to the outputs/ folder
+                    // Leave blank to use the default: <project root>/outputs
 
 /*------------------------------------------------------------------------------
     NOTES
+    - Use forward slashes (/) in all paths, even on Windows
+    - Surround paths that contain spaces with double quotes
+    - Paths can be absolute or relative to the project root
 ------------------------------------------------------------------------------*/
-
-// - Use forward slashes (/) in paths, even on Windows
-// - Stata will convert them automatically
-// - Paths can be absolute or relative
-// - Use quotes if path contains spaces

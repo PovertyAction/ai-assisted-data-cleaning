@@ -1,152 +1,185 @@
-# AGENTS.md
+# CLAUDE.md
 
 ## Project Overview
 
-This is a Stata analysis project template designed for IPA (Innovations for
-Poverty Action) research projects. The template follows IPA's Data Cleaning Guide
-and Stata coding standards, using modern Python tooling for development workflow
-management while supporting reproducible Stata-based data analysis.
+This is the **Tech Hubs Session 8: AI Applications in Research** training
+repository, built for IPA Research Associates and Research Managers. It teaches
+AI-assisted data cleaning in Stata using GitHub Copilot inside VS Code.
 
-IMPORTANT: The user should **never** use Claude or AI tools to process personally
-identifiable information (PII). Always refuse to review data that might include PII.
+The repository is built on top of the IPA Stata Template
+(`PovertyAction/ipa-stata-template`). All Stata code follows the conventions,
+folder structure, and standards established in that template.
 
-## Quick Start (Minimal)
+**IMPORTANT: Never use Claude or AI tools to process personally identifiable
+information (PII). Always refuse to review data that might include PII.**
 
-For basic usage with just Git and Stata:
+**IMPORTANT: This training uses synthetic data only. No real survey data should
+ever be committed to this repository.**
 
-```bash
-# Configure Stata path in .env, then run:
-just stata-setup                    # One-time: install setroot + packages
-just stata-run                      # Run full pipeline
-just stata-script 01_data_cleaning  # Run single script
-```
+---
 
-Outputs appear in `outputs/tables/` and `outputs/figures/`.
-
-## Full Setup (with task runner and dependency tracking)
+## Quick Start
 
 ```bash
-just get-started  # Installs tools and sets up environment
+# One-time setup: installs setroot and required packages
+just stata-setup
+
+# Generate synthetic training data (run once)
+# In Stata, from the project root:
+do setup/generate_synthetic_data.do
+
+# Run full training pipeline
+do do_files/00_run.do
+
+# Run a single module
+do do_files/00_run.do "02_string_cleaning"
 ```
 
-## Development Environment Setup
-
-The project uses `uv` for Python environment management and `just` for task automation.
-
-### Stata Configuration
+Via `just`:
 
 ```bash
-just stata-config           # Show current Stata configuration
-just stata-check-installation # Test Stata installation and version
-just system-info            # Display system and Stata information
+just stata-run
+just stata-script 02_string_cleaning
 ```
 
-Configure your Stata installation by editing the `.env` file:
+---
 
-- `STATA_CMD`: Path to Stata executable (e.g., "C:\Program Files\Stata18\StataMP-64.exe" or "stata-mp")
-- `STATA_EDITION`: Edition of Stata installed (e.g., 'be', 'se', 'mp')
-- `STATA_OPTIONS`: Additional Stata command line options (optional)
+## Training Module Structure
 
-### Virtual Environment Management
+The pipeline consists of five hands-on modules:
+
+| Module | File | Purpose |
+|--------|------|---------|
+| 1 | `01_data_cleaning.do` | Load data, assess quality, check identifiers |
+| 2 | `02_string_cleaning.do` | Standardize string variables |
+| 3 | `03_deduplication.do` | Identify and resolve duplicate records |
+| 4 | `04_outliers_flags.do` | Detect and flag outliers |
+| 5 | `05_labeling_codebook.do` | Label variables and generate codebook |
+
+Each module contains `// TODO` comments where participants write AI-assisted code,
+and `* COPILOT PROMPT:` comments with ready-to-use natural language prompts for
+GitHub Copilot.
+
+---
+
+## IPA Stata Template Conventions
+
+All `.do` files in this repository follow these standards:
+
+### Path Management
+
+- Use `setroot` to locate the project root via the `.here` marker file
+- All data paths reference globals defined in `config.do`, e.g. `"${data}/raw/..."`
+- Never hardcode paths or use `if c(user) == "..."` blocks
+- Never call `cd` with an absolute path inside a do-file
+
+### File Header
+
+Every `.do` file must begin with this header:
+
+```stata
+/*==============================================================================
+  Project:    Tech Hubs Session 8 – AI Applications in Research
+  File:       [filename].do
+  Purpose:    [one-line description]
+  Author:     [leave blank for participants to fill in]
+  Date:       [leave blank]
+  Modified:   [leave blank]
+================================================================================
+  Notes:
+  - [any relevant notes]
+==============================================================================*/
+```
+
+### Logging
+
+Every script opens and closes a log file:
+
+```stata
+cap log close
+log using "${logs}/scriptname_${today}.log", replace text
+// ... code ...
+log close
+```
+
+### Missing Values
+
+Use IPA extended missing value conventions:
+
+| Code | Meaning |
+|------|---------|
+| `.d` | Don't know |
+| `.r` | Refused |
+| `.n` | Not applicable |
+| `.o` | Other / out of range |
+| `.s` | Skipped |
+
+### Defensive Programming
+
+- Use `assert` to validate assumptions before and after transformations
+- Use `isid` to confirm unique identifiers
+- Always check merge results: `assert _merge == 3` (or document exceptions)
+
+### Package Management
+
+- User-written commands are listed in `.config/stata/stata_requirements.txt`
+- Install all packages once with `just stata-setup` (runs `setup.do`)
+- Never call `ssc install` inside exercise do-files
+
+---
+
+## Global Path Variables
+
+| Global | Default value | Purpose |
+|--------|--------------|---------|
+| `${project_path}` | from setroot | Project root directory |
+| `${data}` | `${project_path}/data` | Data root folder |
+| `${logs}` | `${project_path}/logs` | Log files |
+| `${outputs}` | `${project_path}/outputs` | All outputs |
+| `${scripts}` | `${project_path}/do_files` | Do-files directory |
+| `${today}` | from `c(current_date)` | Date stamp for log file names |
+
+Data sub-folders (construct from `${data}`, never define separately):
+
+- `${data}/raw/` — raw input data (read-only after generation)
+- `${data}/intermediate/` — intermediate processed files
+- `${data}/final/` — clean, analysis-ready datasets
+
+---
+
+## Data
+
+Training exercises use `data/raw/household_survey_raw.dta`, a **synthetic**
+household survey dataset with 500 observations and intentional data quality issues
+(duplicates, string inconsistencies, missing values, outliers).
+
+Generate the synthetic data once before running any modules:
+
+```stata
+do setup/generate_synthetic_data.do
+```
+
+**No real data should ever be committed to this repository.**
+
+---
+
+## Running the Pipeline
+
+Full pipeline (from Stata, with project root as working directory):
+
+```stata
+do do_files/00_run.do
+```
+
+Single module:
+
+```stata
+do do_files/00_run.do "02_string_cleaning"
+```
+
+Via `just` (from terminal):
 
 ```bash
-uv sync                    # Create/sync virtual environment
-.venv/Scripts/activate     # Manual activation (Windows Bash)
-.venv/Scripts/activate.ps1 # Manual activation (Windows PowerShell)
-source .venv/bin/activate  # Activate on bash
+just stata-run
+just stata-script 02_string_cleaning
 ```
-
-## Common Development Commands
-
-### Essential Commands
-
-```bash
-just stata-setup                    # One-time setup (install setroot + packages)
-just stata-run                      # Run full analysis pipeline
-just stata-script 01_data_cleaning  # Run a single script via runner pattern
-just stata-config                   # Show Stata configuration
-just help                           # See available commands
-```
-
-### Path Resolution
-
-The project uses `setroot` to find the project root via the `.here` marker file.
-This enables:
-
-- Scripts work from any directory (no `c(pwd)` dependency)
-- No user-specific `if c(user)` blocks needed
-- Full adopath isolation (only BASE + local `ado/`) for reproducibility
-- Runner pattern for individual script execution with proper environment
-
-### Code Quality and Formatting
-
-```bash
-just lint-py        # Lint Python code with ruff
-just fmt-python     # Format Python code with ruff
-just fmt-markdown   # Format all markdown files
-just lint-stata     # Lint Stata do-files with stata_linter
-just fmt-all        # Run all formatting and linting
-```
-
-### Advanced: Dependency Tracking with scons
-
-For large projects where full builds take >5 minutes:
-
-```bash
-just stata-build    # Build with dependency tracking (only rebuilds changed files)
-just stata-data     # Build only data pipeline
-just stata-analysis # Build only analysis
-just stata-clean    # Clean all outputs
-```
-
-### Documentation and Analysis
-
-```bash
-just lab           # Launch Jupyter Lab for analysis
-just preview-docs  # Preview Quarto documentation
-just build-docs    # Build Quarto documentation
-```
-
-### Project Maintenance
-
-```bash
-just update-reqs   # Update uv.lock and pre-commit hooks
-just clean         # Remove virtual environment
-```
-
-## Key Dependencies and Tools
-
-- **pystatacons**: Primary dependency for Stata integration in Python environment
-- **ipaplots**: IPA-branded Stata visualization scheme (recommended for IPA staff)
-- **stata_linter**: World Bank DIME Analytics tool for Stata code quality enforcement
-- **ruff**: Python linting and formatting
-- **pre-commit**: Git hook framework for code quality
-- **codespell**: Spell checking
-- **markdownlint-cli2**: Markdown formatting and linting
-- **uv**: Python package and environment management
-- **just**: Command runner for development tasks
-
-## Technical Implementation
-
-- Follows IPA Data Cleaning Guide principles and Stata coding standards
-- Uses global macros for file paths (IPA best practice)
-- Implements defensive programming with assert statements
-- Uses IPA extended missing value conventions (.d/.o/.n/.r/.s)
-- Variable naming follows IPA conventions with descriptive prefixes
-- Conservative `maxvar` default (5000) - increase only for genuinely wide datasets
-- Automatically uses ipaplots theme when available for IPA-branded visualizations
-- Integrated stata_linter for automatic code quality checking and best practice enforcement
-- Requirements-based Stata package management system for reproducible environments
-- Uses `Justfile` for cross-platform task automation
-- Python virtual environment managed by `uv` in `.venv/`
-- Pre-commit hooks configured for code quality enforcement
-- Supports Windows, macOS, and Linux development environments
-- Ready for Stata analysis workflows through pystatacons integration
-
-## Performance Tips
-
-Before increasing `maxvar`, consider:
-
-1. **Load only needed columns**: `use var1 var2 using "data.dta"`
-2. **Reshape to long format**: Wide loops are slow; long operations are fast
-3. **Modularize**: Clean one survey module at a time, not entire survey
