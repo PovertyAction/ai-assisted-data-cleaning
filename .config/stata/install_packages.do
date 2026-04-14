@@ -29,7 +29,7 @@ forvalues i=1(1)`count_paths'{
 * remove all other ado paths
 * Install required packages to the project ado folder
 * Set PLUS to project ado folder
-sysdir set PLUS "${root}/ado"
+* sysdir set PLUS "${root}/ado"
 
 * docs: https://github.com/sergiocorreia/stata-require
 ssc install require, replace
