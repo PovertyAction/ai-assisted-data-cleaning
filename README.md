@@ -128,15 +128,14 @@ autocomplete triggers.
 
 ### Module 01 — Data Cleaning (`01_data_cleaning.do`)
 
-1. Export a missing-value summary table (variable name, count missing, % missing)
-   to `outputs/missing_summary.csv` — key commands: `missings report`, `export delimited`
+1. Show missingness information (variable name, count missing, % missing) — key commands: `missings report`
 
 ### Module 02 — String Cleaning (`02_string_cleaning.do`)
 
 | # | Exercise | Key commands |
 | - | -------- | ------------ |
 | 1 | Trim leading and trailing whitespace from every string variable | `ds, has(type string)`, `strtrim()` |
-| 2 | Standardise `respondent_name` to title case | `proper()` |
+| 2 | Standardise `enumerator_name` to title case | `proper()` |
 | 3 | Clean `district_name` — lowercase, trim spaces, collapse internal spaces | `lower()`, `strtrim()`, `itrim()` |
 | 4 | Recode `occupation_raw` to five canonical categories: Farmer, Teacher, Trader, Laborer, Other | `inlist()`, `strmatch()` |
 
@@ -146,8 +145,8 @@ autocomplete triggers.
 | - | -------- | ------------ |
 | 1 | Report how many records share the same `hhid` | `duplicates report` |
 | 2 | Create an `is_duplicate` flag (0 = unique, 1 = duplicate) | `duplicates tag` |
-| 3 | Keep only the most recent record per `hhid` using `survey_date` | `bysort hhid (survey_date): keep if _n == _N`, `isid` |
-| 4 | Export a one-row deduplication log (obs before, after, removed) to `outputs/dedup_log.csv` | `preserve/restore`, `export delimited` |
+| 3 | Export all duplicate records to `outputs/hh_duplicates.xlsx` for review | `export excel ... if is_duplicate == 1` |
+| 4 | Keep only the most recent record per `hhid` using `survey_date` | `bysort hhid (survey_date): keep if _n == _N`, `isid` |
 
 ### Module 04 — Outliers & Flags (`04_outliers_flags.do`)
 
@@ -155,8 +154,6 @@ autocomplete triggers.
 | - | -------- | ------------ |
 | 1 | Flag outliers in `hh_income_monthly` using the IQR method; add an `income_flag_reason` string | `summarize, detail`, `r(p25)`, `r(p75)` |
 | 2 | Winsorise `hh_expenditure` at the 1st and 99th percentiles | `winsor2 ..., cuts(1 99) replace` |
-| 3 | Replace negative values in `hh_income_monthly`, `hh_expenditure`, `hh_savings` with `.o` (IPA "out of range") | `replace var = .o if var < 0` |
-| 4 | Export a flag summary table (variable, count flagged, reason) to `outputs/flag_summary.csv` | `preserve/restore`, `export delimited` |
 
 ### Module 05 — Labeling & Codebook (`05_labeling_codebook.do`)
 
