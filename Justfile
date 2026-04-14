@@ -195,6 +195,12 @@ stata-install-packages: stata-check-installation
     @"{{ stata_cmd }}" {{ stata_options }} {{ stata_mode }} do ".config/stata/install_packages.do"
     @echo "Check Stata installation..."
 
+# create synthetic dataset for testing
+create-synthetic-data:
+    @echo "Creating synthetic dataset for testing..."
+    @& "{{ stata_cmd }}" {{ stata_options }} {{ stata_mode }} do "setup/generate_synthetic_data.do"
+    @echo "Synthetic dataset created: data/raw/household_survey_raw.dta"
+
 # ==============================================================================
 # CODE QUALITY & FORMATTING
 # ==============================================================================

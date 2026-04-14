@@ -60,7 +60,9 @@ inside VS Code, built on top of the
 
    In Stata, from the project root:
 
-   ```stata
+   ```bash
+   just create-synthetic-data
+   # or from Stata directly:
    do setup/generate_synthetic_data.do
    ```
 
