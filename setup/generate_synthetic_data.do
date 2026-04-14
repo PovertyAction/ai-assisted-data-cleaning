@@ -70,42 +70,28 @@ gen village_name = "Village_" + string(village_code, "%02.0f")
 drop village_code
 label variable village_name "Village name"
 
-* --- Respondent Name (with deliberate inconsistencies introduced below) ---
+* --- Enumerator Name (with deliberate inconsistencies introduced below) ---
 * First names (10 options)
 local fn1 "John"
 local fn2 "Mary"
 local fn3 "Peter"
-local fn4 "Grace"
-local fn5 "David"
-local fn6 "Ruth"
-local fn7 "Samuel"
-local fn8 "Esther"
-local fn9 "Daniel"
-local fn10 "Alice"
 
 * Last names (10 options)
 local ln1 "Okonkwo"
 local ln2 "Mensah"
 local ln3 "Diallo"
-local ln4 "Kamara"
-local ln5 "Nkrumah"
-local ln6 "Asante"
-local ln7 "Boateng"
-local ln8 "Owusu"
-local ln9 "Traore"
-local ln10 "Coulibaly"
 
-gen fn_idx = ceil(runiform() * 10)
-gen ln_idx = ceil(runiform() * 10)
-gen respondent_name = ""
+gen fn_idx = ceil(runiform() * 3)
+gen ln_idx = ceil(runiform() * 3)
+gen enumerator_name = ""
 
 forvalues i = 1/10 {
     forvalues j = 1/10 {
-        replace respondent_name = "`fn`i'' `ln`j''" if fn_idx == `i' & ln_idx == `j'
+        replace enumerator_name = "`fn`i'' `ln`j''" if fn_idx == `i' & ln_idx == `j'
     }
 }
 drop fn_idx ln_idx
-label variable respondent_name "Name of respondent"
+label variable enumerator_name "Name of enumerator"
 
 * --- Occupation (raw, with deliberate inconsistencies introduced below) ---
 gen occ_code = ceil(runiform() * 5)
@@ -161,10 +147,10 @@ replace district_name = lower(district_name) if runiform() < 0.20
 replace district_name = upper(district_name) if runiform() < 0.10
 replace district_name = district_name + " "  if runiform() < 0.10
 
-* 2. String inconsistencies in respondent_name (~20% of observations)
-replace respondent_name = upper(respondent_name)  if runiform() < 0.10
-replace respondent_name = lower(respondent_name)  if runiform() < 0.10
-replace respondent_name = " " + respondent_name   if runiform() < 0.05
+* 2. String inconsistencies in enumerator_name (~20% of observations)
+replace enumerator_name = upper(enumerator_name)  if runiform() < 0.10
+replace enumerator_name = lower(enumerator_name)  if runiform() < 0.10
+replace enumerator_name = " " + enumerator_name   if runiform() < 0.05
 
 * 3. String inconsistencies in occupation_raw (~35% of observations)
 replace occupation_raw = lower(occupation_raw)               if runiform() < 0.15
@@ -185,14 +171,14 @@ replace hh_income_monthly = -abs(hh_income_monthly) if runiform() < 0.01 & !miss
 replace hh_expenditure = -abs(hh_expenditure) if runiform() < 0.01
 
 * ─── Append ~30 Duplicate Records ────────────────────────────────────────────
-* Create duplicates by re-using the first 30 household IDs with slightly
+* Create duplicates by reusing the first 30 household IDs with slightly
 * different survey dates (simulates re-interviews or data entry errors).
 preserve
     keep if _n <= 30
     * Give duplicates a later survey date (1–14 days later)
     replace survey_date = survey_date + floor(runiform() * 14 + 1)
     * Introduce minor name variation in some duplicates
-    replace respondent_name = upper(respondent_name) if runiform() > 0.7
+    replace enumerator_name = upper(enumerator_name) if runiform() > 0.7
     tempfile duplicates
     save `duplicates'
 restore
