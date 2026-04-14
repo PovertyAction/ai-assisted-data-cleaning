@@ -52,7 +52,7 @@ if "${project_path}" == "" {
 
 * ─── Open Log ────────────────────────────────────────────────────────────────
 cap log close module04
-log using "${log_dir}/04_outliers_flags.log", replace text name(module04)
+log using "${log_dir}/04_outliers_flags.smcl", replace smcl name(module04)
 
 di _n "{hline 70}"
 di "MODULE 04: Outliers and Flags"
@@ -85,16 +85,9 @@ summarize hh_income_monthly, detail
 di "=== IQR Outlier Detection for hh_income_monthly ==="
 
 // Your code here:
-// Step 1: Compute Q1, Q3, IQR
+// Step 1: Compute quartiles and IQR using summarize with detail
 summarize hh_income_monthly, detail
-// local q1  = r(p25)
-// local q3  = r(p75)
-// local iqr = `q3' - `q1'
-// local lower = `q1' - 1.5 * `iqr'
-// local upper = `q3' + 1.5 * `iqr'
-
-// TODO: Create income_flag and income_flag_reason
-
+// Your code here:
 
 
 
@@ -115,54 +108,8 @@ summarize hh_expenditure, detail
 
 // Your code here:
 
-
 di "=== hh_expenditure (after winsorisation) ==="
 summarize hh_expenditure, detail
-
-* ─── TODO: Replace Negative Values with .o (IPA Convention) ─────────────────
-/*
-  EXERCISE 3: Any negative value in a household-level numeric variable
-  (hh_income_monthly, hh_expenditure, hh_savings) is implausible and should
-  be recoded to .o (out of range / other) per IPA extended missing value
-  conventions.
-
-  * COPILOT PROMPT: Loop over the variables hh_income_monthly, hh_expenditure,
-  *   and hh_savings. For each variable, replace any value less than 0 with .o
-  *   (the IPA "out of range" extended missing value code).
-  *   Report how many replacements were made for each variable.
-*/
-
-// TODO: Replace negative values in hh_* variables with .o
-di "=== Replacing Negative Values with .o ==="
-
-// Your code here:
-// foreach var of varlist hh_income_monthly hh_expenditure hh_savings {
-//     count if `var' < 0 & !missing(`var')
-//     replace `var' = .o if `var' < 0
-// }
-
-
-
-
-* ─── TODO: Export Flag Summary ───────────────────────────────────────────────
-/*
-  EXERCISE 4: Export a summary of the flagging results as a CSV.
-
-  * COPILOT PROMPT: Create a summary table with one row per flag type, showing
-  *   the variable name, the number of flagged observations, and the flag reason.
-  *   Export the table to "${outputs}/flag_summary.csv" using export delimited.
-  *
-  *   Hint: Use preserve/restore, then create a small dataset manually with
-  *   gen varname = "", gen n_flagged = ..., etc., then export and restore.
-*/
-
-// TODO: Export flag summary
-di "=== Exporting Flag Summary ==="
-
-// Your code here:
-
-
-
 
 * ─── Validation ──────────────────────────────────────────────────────────────
 assert !missing(hhid)

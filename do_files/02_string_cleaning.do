@@ -50,7 +50,7 @@ if "${project_path}" == "" {
 
 * ─── Open Log ────────────────────────────────────────────────────────────────
 cap log close module02
-log using "${log_dir}/02_string_cleaning.log", replace text name(module02)
+log using "${log_dir}/02_string_cleaning.smcl", replace smcl name(module02)
 
 di _n "{hline 70}"
 di "MODULE 02: String Cleaning"
@@ -73,38 +73,33 @@ di "String variables: `r(varlist)'"
   EXERCISE 1: Trim leading and trailing spaces from every string variable.
 
   * COPILOT PROMPT: Use a foreach loop over all string variables to trim leading
-  *   and trailing whitespace from each one.
-  *   Use "ds, has(type string)" to get the list of string variables, then loop
-  *   with: replace varname = strtrim(varname)
+  *   and trailing whitespace from each one. Get the list of string variables, 
+  *   then apply strtrim() to each variable in the loop.
 */
 
 // TODO: Trim all string variables
 // Hint: ds, has(type string) lists all string variables
-
-
-
-
-* ─── TODO: Standardise respondent_name to Title Case ────────────────────────
-/*
-  EXERCISE 2: Standardise respondent_name so the first letter of each word
-  is capitalised and all others are lowercase ("title case").
-
-  * COPILOT PROMPT: Convert respondent_name to title case so that each word
-  *   starts with a capital letter and the rest are lowercase.
-  *   Use the proper() function in Stata: replace respondent_name = proper(respondent_name)
-*/
-
-// TODO: Convert respondent_name to title case
-// Preview before:
-di "=== respondent_name sample (before) ==="
-list respondent_name in 1/10, noobs
+// Get list of all string variables
 
 // Your code here:
 
+* ─── TODO: Standardise enumerator_name to Title Case ────────────────────────
+/*
+  EXERCISE 2: Standardise enumerator_name so the first letter of each word
+  is capitalised and all others are lowercase ("title case").
 
-// Preview after:
-di "=== respondent_name sample (after) ==="
-list respondent_name in 1/10, noobs
+  * COPILOT PROMPT: Convert enumerator_name to title case so that each word
+  *   starts with a capital letter and the rest are lowercase.
+  *   Use the proper() function in Stata: replace enumerator_name = proper(enumerator_name)
+*/
+
+// TODO: Convert enumerator_name to title case
+// HINT: Type a comment on in the code section and let Copilot suggest the syntax for proper case conversion.
+// Preview before:
+di "=== enumerator_name sample (before) ==="
+list enumerator_name in 1/10, noobs
+
+// Your code here:
 
 * ─── TODO: Clean district_name ──────────────────────────────────────────────
 /*
@@ -158,24 +153,10 @@ di "=== occupation_raw (before) ==="
 tab occupation_raw, sort missing
 
 // Your code here:
-// Step 1: Create a temporary lowercase version for matching
-gen occ_lower = lower(strtrim(occupation_raw))
-
-// Step 2: Create occupation_clean (fill in the mappings)
-gen occupation_clean = ""
-
-// TODO: Use replace + inlist() to map each category
-// Example:
-// replace occupation_clean = "Farmer" if inlist(occ_lower, "farmer", "farming")
-
-
 
 
 // Step 3: Default unmapped values to "Other"
 replace occupation_clean = "Other" if occupation_clean == "" & occupation_raw != ""
-
-// Clean up the temporary variable
-drop occ_lower
 
 // Preview result:
 di "=== occupation_clean (after) ==="

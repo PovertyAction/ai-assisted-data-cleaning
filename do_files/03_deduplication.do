@@ -52,7 +52,7 @@ if "${project_path}" == "" {
 
 * ─── Open Log ────────────────────────────────────────────────────────────────
 cap log close module03
-log using "${log_dir}/03_deduplication.log", replace text name(module03)
+log using "${log_dir}/03_deduplication.smcl", replace smcl name(module03)
 
 di _n "{hline 70}"
 di "MODULE 03: Deduplication"
@@ -71,14 +71,12 @@ di "Observations at start: `obs_start'"
   * COPILOT PROMPT: Use the duplicates command to report how many observations
   *   share the same hhid value. Show both the number of groups and the number
   *   of excess observations (i.e. the duplicates).
-  *   Command: duplicates report hhid
 */
 
 // TODO: Report duplicates on hhid
 di "=== Duplicate Report ==="
 
 // Your code here:
-duplicates report hhid
 
 
 
@@ -88,37 +86,28 @@ duplicates report hhid
 
   * COPILOT PROMPT: Create a variable called is_duplicate that equals 1 for any
   *   observation whose hhid appears more than once in the dataset, and 0
-  *   otherwise. Use: duplicates tag hhid, gen(is_duplicate)
+  *   otherwise.
   *   Then relabel and recode so 0 = unique, 1 = duplicate.
 */
 
 // TODO: Create is_duplicate flag variable
 
 // Your code here:
-// Create duplicate tag variable
-duplicates tag hhid, gen(is_duplicate)
 
-// Recode so that 0 = unique, 1+ becomes 1 = duplicate  
-recode is_duplicate (1/max = 1)
+* ─── TODO: Export Duplicate Observations ─────────────────────────────────────
+/*
+  EXERCISE 3: Export all duplicate records to a CSV for review.
 
-// Label the variable and values
-label variable is_duplicate "Duplicate household ID flag"
-label define dup_lab 0 "Unique" 1 "Duplicate" 
-label values is_duplicate dup_lab
-
-* After creating is_duplicate, verify it:
-capture confirm variable is_duplicate
-if _rc == 0 {
-    tab is_duplicate, missing
-    di "Duplicate observations: " _N - `obs_start' + 0
-}
-else {
-    di as error "is_duplicate not yet created — complete the TODO above."
-}
+  * COPILOT PROMPT: Export all duplicate observations into an excel sheet.
+  *   where is_duplicate == 1 to a XLSX file in the outputs folder. Name the file
+  *   "hh_duplicates.xlsx".
+*/
+di "=== Exporting Duplicate Records ==="
+export excel using "${outputs}/hh_duplicates.xlsx" if is_duplicate == 1, firstrow(variables) replace 
 
 * ─── TODO: Keep Most Recent Record per hhid ──────────────────────────────────
 /*
-  EXERCISE 3: For each hhid that appears more than once, keep only the record
+  EXERCISE 4: For each hhid that appears more than once, keep only the record
   with the most recent survey_date.
 
   * COPILOT PROMPT: Sort the dataset by hhid and survey_date (ascending).
@@ -131,11 +120,6 @@ else {
 di "=== Deduplication: Keeping Most Recent Record ==="
 
 // Your code here:
-// Sort by hhid and survey_date (ascending)
-sort hhid survey_date
-
-// Keep only the most recent record per hhid
-bysort hhid (survey_date): keep if _n == _N
 
 
 ***** Validate Uniqueness *****
@@ -145,30 +129,6 @@ di "PASS: hhid is unique after deduplication."
 local obs_end = `c(N)'
 di "Observations removed: " `obs_start' - `obs_end'
 di "Observations remaining: `obs_end'"
-
-* ─── TODO: Export Deduplication Log ──────────────────────────────────────────
-/*
-  EXERCISE 4: Export a log of the deduplication results.
-
-  * COPILOT PROMPT: Create a summary dataset with one row, containing the
-  *   variables: obs_before, obs_after, and obs_removed. Export it as a CSV
-  *   file to "${outputs}/dedup_log.csv" using export delimited.
-*/
-
-// TODO: Export deduplication log to CSV
-di "=== Exporting Dedup Log ==="
-
-// Your code here:
-// Hint:
-// preserve
-//   clear
-//   set obs 1
-//   gen obs_before  = ...
-//   gen obs_after   = ...
-//   gen obs_removed = obs_before - obs_after
-//   export delimited "${outputs}/dedup_log.csv", replace
-// restore
-
 
 
 

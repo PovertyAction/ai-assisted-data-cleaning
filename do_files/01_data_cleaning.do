@@ -53,7 +53,7 @@ if "${project_path}" == "" {
 
 * ─── Open Log ────────────────────────────────────────────────────────────────
 cap log close module01
-log using "${log_dir}/01_data_cleaning.log", replace text name(module01)
+log using "${log_dir}/01_data_cleaning.smcl", replace smcl name(module01)
 
 di _n "{hline 70}"
 di "MODULE 01: Data Cleaning"
@@ -109,16 +109,14 @@ tab edu_level, missing
 
   * COPILOT PROMPT: Using the missings command, create a summary table with each
   *   variable name, the count of missing values, and the percentage missing.
-  *   Export the result as a CSV to "${outputs}/missing_summary.csv".
   *
   *   Tip: Type "missings report" and let Copilot suggest the syntax.
-  *   Then use "export delimited" to write the CSV.
 */
 
 // TODO: Generate and export missing value summary table
-// Example starter: missings report, gen(n_miss)
+// Example starter: missings report, percent
 
-
+// Your code here:
 
 
 * ─── Save Working Copy ────────────────────────────────────────────────────────

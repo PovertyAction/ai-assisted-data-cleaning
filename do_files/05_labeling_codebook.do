@@ -53,7 +53,7 @@ if "${project_path}" == "" {
 
 * ─── Open Log ────────────────────────────────────────────────────────────────
 cap log close module05
-log using "${log_dir}/05_labeling_codebook.log", replace text name(module05)
+log using "${log_dir}/05_labeling_codebook.smcl", replace smcl name(module05)
 
 di _n "{hline 70}"
 di "MODULE 05: Labeling and Codebook"
@@ -74,7 +74,7 @@ di "Observations: `c(N)'"
   *   Variables to label:
   *     hhid               - Household ID (unique identifier)
   *     survey_date        - Date of survey interview
-  *     respondent_name    - Name of survey respondent (title case)
+  *     enumerator_name    - Name of survey respondent (title case)
   *     district_name      - District name (cleaned, lowercase)
   *     village_name       - Village name
   *     occupation_raw     - Respondent occupation (raw string)
@@ -97,14 +97,7 @@ di "Observations: `c(N)'"
 
 // TODO: Label all variables
 di "=== Applying Variable Labels ==="
-
 // Your code here:
-// label variable hhid              "Household ID (unique identifier)"
-// label variable survey_date       "Date of survey interview"
-// ...
-
-
-
 
 * ─── TODO: Value Labels for Binary _yn Variables ────────────────────────────
 /*
@@ -123,11 +116,6 @@ di "=== Applying Variable Labels ==="
 di "=== Applying Value Labels to _yn Variables ==="
 
 // Your code here:
-// label define yn_label 0 "No" 1 "Yes"
-// foreach var of varlist *_yn {
-//     label values `var' yn_label
-// }
-
 
 
 
@@ -147,16 +135,6 @@ di "=== Applying Value Labels to _yn Variables ==="
 di "=== Applying Value Label to edu_level ==="
 
 // Your code here:
-
-
-
-
-* Verify labels were applied
-di "=== Value Label Check ==="
-capture label list yn_label
-if _rc == 0 tab female_yn, missing
-capture label list edu_label
-if _rc == 0 tab edu_level, missing
 
 * ─── TODO: Generate Codebook ─────────────────────────────────────────────────
 /*
