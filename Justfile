@@ -57,8 +57,6 @@ update-reqs:
 # create virtual environment
 venv:
     uv sync
-    uv run python -m nbstata.install --sys-prefix --conf-file
-    uv run python -c "import re;from pathlib import Path;c=Path('.venv/etc/nbstata.conf');d=str(Path(r'{{ stata_cmd }}').parent);e='{{ stata_edition }}';t=re.sub(r'^stata_dir =.*$',lambda m:'stata_dir = '+d,c.read_text(),flags=re.MULTILINE);c.write_text(re.sub(r'^edition =.*$',lambda m:'edition = '+e,t,flags=re.MULTILINE))"
     uv tool install pre-commit
     uv run pre-commit install
 
@@ -198,50 +196,6 @@ stata-install-packages: stata-check-installation
     @echo "Check Stata installation..."
 
 # ==============================================================================
-# ADVANCED - Python/Jupyter integration
-# Requires: uv, Python, nbstata setup (run 'just get-started' first)
-# ==============================================================================
-
-# Launch Jupyter Lab for interactive analysis
-lab:
-    uv run jupyter lab
-
-# ==============================================================================
-# DOCUMENTATION & REPORTS
-# ==============================================================================
-
-# Render analysis report with Stata outputs
-render-report path:
-    @echo "Rendering analysis report..."
-    quarto render {{ path }}
-
-# Render report as html
-render-html path:
-    @echo "Rendering analysis report as HTML..."
-    quarto render {{ path }} --to html
-
-# Render report as PDF
-render-pdf path:
-    @echo "Rendering analysis report as PDF..."
-    quarto render {{ path }} --to typst
-
-# Render report as DOCX (Word)
-render-docx path:
-    @echo "Rendering analysis report as DOCX..."
-    quarto render {{ path }} --to docx
-    @echo "Adding custom cover page..."
-    uv run python reports/merge_cover_page.py
-
-# Preview analysis report
-preview-report path:
-    quarto preview {{ path }}
-
-# Convert PDF figures to PNG for DOCX compatibility
-convert-figures:
-    @echo "Converting PDF figures to PNG..."
-    uv run python reports/convert_figures.py
-
-# ==============================================================================
 # CODE QUALITY & FORMATTING
 # ==============================================================================
 
@@ -333,56 +287,6 @@ stata-check-linter:
 fmt-all: lint-py fmt-python lint-sql fmt-markdown lint-stata
 
 # ==============================================================================
-# ADVANCED - Dependency tracking with scons
-# For large projects where rebuild time matters (>5 min builds)
-# Only use if your full pipeline is genuinely slow
-# ==============================================================================
-
-# Run Stata analysis using statacons (rebuilds only changed files)
-stata-build:
-    uv run scons
-
-# Run specific Stata analysis targets
-stata-data:
-    uv run scons data
-
-stata-analysis:
-    uv run scons analysis
-
-stata-figures:
-    uv run scons figures
-
-# Clean Stata outputs (preserves .gitkeep files)
-stata-clean:
-    uv run scons -c
-
-# Quick data check - show basic info about analysis data
-data-info:
-    uv run scons data
-    @echo "Analysis data created. Check logs/ for data cleaning logs."
-
-# Run data quality checks
-data-check:
-    @echo "Running data quality checks..."
-    @{{ stata_cmd }} {{ stata_options }} {{ stata_mode }} do "do_files/01_data_cleaning.do"
-    @echo "Check logs/01_data_cleaning.log for results"
-
-# Generate only tables (no figures)
-stata-tables:
-    uv run scons analysis
-
-# Comprehensive analysis pipeline with status updates
-stata-full:
-    @echo "Starting full Stata analysis pipeline..."
-    @echo "Step 1: Data cleaning and preparation"
-    uv run scons data
-    @echo "Step 2: Analysis and tables"
-    uv run scons analysis
-    @echo "Step 3: Figures and visualizations"
-    uv run scons figures
-    @echo "Analysis complete! Check outputs/ for results"
-
-# ==============================================================================
 # HELP & UTILITIES
 # ==============================================================================
 
@@ -398,10 +302,6 @@ help:
     @echo "just stata-run            - Run full analysis pipeline"
     @echo "just stata-script <name>  - Run single script (e.g., 01_data_cleaning)"
     @echo "just stata-do <file>      - Run any do-file directly"
-    @echo ""
-    @echo "=== ADVANCED (scons) ==="
-    @echo "just stata-full           - Complete Stata analysis with dependency tracking"
-    @echo "just stata-build          - Build with scons (only rebuilds changed files)"
     @echo ""
     @echo "For complete command list, see: just --list"
 

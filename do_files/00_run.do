@@ -87,9 +87,13 @@ capture mkdir "${outputs}"
 capture mkdir "${data}/intermediate"
 capture mkdir "${data}/final"
 
+* Create date-based log subfolder so each run's logs are grouped together
+global log_dir "${logs}/${today}"
+capture mkdir "${log_dir}"
+
 * ─── Open Master Log ──────────────────────────────────────────────────────────
 cap log close master
-log using "${logs}/00_run_${today}.log", replace text name(master)
+log using "${log_dir}/00_run.log", replace text name(master)
 
 * ─── System Info ──────────────────────────────────────────────────────────────
 di _n "{hline 70}"
@@ -116,7 +120,6 @@ if "`script_to_run'" != "" {
     di "{hline 70}"
     do "${scripts}/`script_to_run'.do"
     log close master
-    capture erase "${project_path}/00_run.log"
     exit
 }
 
@@ -185,7 +188,8 @@ di "  ${outputs}/dedup_log.csv"
 di "  ${outputs}/flag_summary.csv"
 di "  ${outputs}/codebook.xlsx"
 di "  ${data}/final/hh_clean_final.dta"
+di _n "Logs written to:"
+di "  ${log_dir}/"
 di "{hline 70}"
 
 log close master
-capture erase "${project_path}/00_run.log"

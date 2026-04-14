@@ -45,11 +45,14 @@ if "${project_path}" == "" {
 
     capture mkdir "${logs}"
     capture mkdir "${outputs}"
+
+    global log_dir "${logs}/${today}"
+    capture mkdir "${log_dir}"
 }
 
 * ─── Open Log ────────────────────────────────────────────────────────────────
 cap log close module03
-log using "${logs}/03_deduplication_${today}.log", replace text name(module03)
+log using "${log_dir}/03_deduplication.log", replace text name(module03)
 
 di _n "{hline 70}"
 di "MODULE 03: Deduplication"
@@ -75,7 +78,7 @@ di "Observations at start: `obs_start'"
 di "=== Duplicate Report ==="
 
 // Your code here:
-
+duplicates report hhid
 
 
 
@@ -92,7 +95,16 @@ di "=== Duplicate Report ==="
 // TODO: Create is_duplicate flag variable
 
 // Your code here:
+// Create duplicate tag variable
+duplicates tag hhid, gen(is_duplicate)
 
+// Recode so that 0 = unique, 1+ becomes 1 = duplicate  
+recode is_duplicate (1/max = 1)
+
+// Label the variable and values
+label variable is_duplicate "Duplicate household ID flag"
+label define dup_lab 0 "Unique" 1 "Duplicate" 
+label values is_duplicate dup_lab
 
 * After creating is_duplicate, verify it:
 capture confirm variable is_duplicate
@@ -119,11 +131,14 @@ else {
 di "=== Deduplication: Keeping Most Recent Record ==="
 
 // Your code here:
+// Sort by hhid and survey_date (ascending)
+sort hhid survey_date
+
+// Keep only the most recent record per hhid
+bysort hhid (survey_date): keep if _n == _N
 
 
-
-
-* ─── Validate Uniqueness ──────────────────────────────────────────────────────
+***** Validate Uniqueness *****
 isid hhid
 di "PASS: hhid is unique after deduplication."
 

@@ -97,7 +97,7 @@ exercise. Every module contains `// TODO` comments and `* COPILOT PROMPT:`
 comments with ready-to-use natural language prompts.
 
 | Module | File | Topic |
-|--------|------|-------|
+| ------ | ---- | ----- |
 | 01 | `do_files/01_data_cleaning.do` | Load data, inspect quality, check identifiers |
 | 02 | `do_files/02_string_cleaning.do` | Trim spaces, title case, standardise categories |
 | 03 | `do_files/03_deduplication.do` | Detect and resolve duplicate records |
@@ -114,6 +114,56 @@ Each module:
 3. **Contains TODOs** — blank sections where participants write Copilot-assisted code
 4. **Contains COPILOT PROMPT comments** — copy the plain-English prompt into
    Copilot Chat or let inline Copilot autocomplete the code
+
+---
+
+## Exercises
+
+Each module contains one or more exercises marked with `// TODO` and
+`* COPILOT PROMPT:` comments. The prompts are written in plain English so you
+can paste them directly into GitHub Copilot Chat or use them as inline
+autocomplete triggers.
+
+### Module 01 — Data Cleaning (`01_data_cleaning.do`)
+
+1. Export a missing-value summary table (variable name, count missing, % missing)
+   to `outputs/missing_summary.csv` — key commands: `missings report`, `export delimited`
+
+### Module 02 — String Cleaning (`02_string_cleaning.do`)
+
+| # | Exercise | Key commands |
+| - | -------- | ------------ |
+| 1 | Trim leading and trailing whitespace from every string variable | `ds, has(type string)`, `strtrim()` |
+| 2 | Standardise `respondent_name` to title case | `proper()` |
+| 3 | Clean `district_name` — lowercase, trim spaces, collapse internal spaces | `lower()`, `strtrim()`, `itrim()` |
+| 4 | Recode `occupation_raw` to five canonical categories: Farmer, Teacher, Trader, Laborer, Other | `inlist()`, `strmatch()` |
+
+### Module 03 — Deduplication (`03_deduplication.do`)
+
+| # | Exercise | Key commands |
+| - | -------- | ------------ |
+| 1 | Report how many records share the same `hhid` | `duplicates report` |
+| 2 | Create an `is_duplicate` flag (0 = unique, 1 = duplicate) | `duplicates tag` |
+| 3 | Keep only the most recent record per `hhid` using `survey_date` | `bysort hhid (survey_date): keep if _n == _N`, `isid` |
+| 4 | Export a one-row deduplication log (obs before, after, removed) to `outputs/dedup_log.csv` | `preserve/restore`, `export delimited` |
+
+### Module 04 — Outliers & Flags (`04_outliers_flags.do`)
+
+| # | Exercise | Key commands |
+| - | -------- | ------------ |
+| 1 | Flag outliers in `hh_income_monthly` using the IQR method; add an `income_flag_reason` string | `summarize, detail`, `r(p25)`, `r(p75)` |
+| 2 | Winsorise `hh_expenditure` at the 1st and 99th percentiles | `winsor2 ..., cuts(1 99) replace` |
+| 3 | Replace negative values in `hh_income_monthly`, `hh_expenditure`, `hh_savings` with `.o` (IPA "out of range") | `replace var = .o if var < 0` |
+| 4 | Export a flag summary table (variable, count flagged, reason) to `outputs/flag_summary.csv` | `preserve/restore`, `export delimited` |
+
+### Module 05 — Labeling & Codebook (`05_labeling_codebook.do`)
+
+| # | Exercise | Key commands |
+| - | -------- | ------------ |
+| 1 | Apply descriptive variable labels to all 21 variables in the dataset | `label variable` |
+| 2 | Define a `yn_label` (0 = No, 1 = Yes) and apply it to all `_yn` binary variables | `label define`, `label values`, `foreach var of varlist *_yn` |
+| 3 | Define an `edu_label` (0–3: No education → Tertiary) and apply it to `edu_level` | `label define`, `label values` |
+| 4 | Generate and export a codebook to `outputs/codebook.xlsx` | `ipacodebook` (preferred), or `codebook` + `putexcel` |
 
 ---
 
@@ -138,8 +188,7 @@ Each module:
 │   ├── 02_string_cleaning.do           # MODULE 02: String standardisation
 │   ├── 03_deduplication.do             # MODULE 03: Duplicate detection and resolution
 │   ├── 04_outliers_flags.do            # MODULE 04: Outlier detection and flagging
-│   ├── 05_labeling_codebook.do         # MODULE 05: Variable labels and codebook
-│   └── functions.do                    # Reusable helper functions (from IPA template)
+│   └── 05_labeling_codebook.do         # MODULE 05: Variable labels and codebook
 │
 ├── data/
 │   ├── raw/                            # Raw input data (read-only after generation)
@@ -153,7 +202,15 @@ Each module:
 │   ├── flag_summary.csv                # From module 04
 │   └── codebook.xlsx                   # From module 05
 │
-├── logs/                               # Timestamped Stata log files
+├── logs/
+│   ├── setup.log                       # One-time setup log (root level)
+│   └── 14_Apr_2026/                    # Date-based subfolder (one per run)
+│       ├── 00_run.log
+│       ├── 01_data_cleaning.log
+│       ├── 02_string_cleaning.log
+│       ├── 03_deduplication.log
+│       ├── 04_outliers_flags.log
+│       └── 05_labeling_codebook.log
 ├── ado/                                # Local Stata packages (installed by setup.do)
 │
 ├── .config/
@@ -185,7 +242,7 @@ the `.here` marker file. This means:
 After `00_run.do` runs, these globals are available in all modules:
 
 | Global | Default | Purpose |
-|--------|---------|---------|
+| ------ | ------- | ------- |
 | `${project_path}` | (from setroot) | Project root directory |
 | `${data}` | `${project_path}/data` | Data root folder |
 | `${logs}` | `${project_path}/logs` | Log files |
@@ -287,31 +344,13 @@ just help                             # See all available commands
 
 ### Full Development Environment
 
-For Python tools, pre-commit hooks, and Quarto:
+For Python tools and pre-commit hooks:
 
 ```bash
 just get-started
 ```
 
-This installs: `uv` (Python), `Quarto`, `markdownlint-cli2`, `nbstata` (Stata
-in VS Code/Jupyter), and all Stata packages.
-
-### VS Code Integration with nbstata
-
-Run Stata interactively in VS Code (similar to the Ctrl+D workflow):
-
-1. Install the [vscode-stata](https://marketplace.visualstudio.com/items?itemName=kylebutts.vscode-stata) extension
-2. Select the nbstata kernel at `.venv/Scripts/python.exe` (Windows) or `.venv/bin/python` (macOS/Linux)
-3. Test with the demo files in `do_files/demo/`
-
-### Dependency Tracking with scons
-
-For projects where full rebuilds take more than a few minutes:
-
-```bash
-just stata-build    # Only rebuild files whose inputs changed
-just stata-clean    # Remove all outputs
-```
+This installs: `uv` (Python), `markdownlint-cli2`, and all Stata packages.
 
 ---
 

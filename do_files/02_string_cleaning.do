@@ -43,11 +43,14 @@ if "${project_path}" == "" {
 
     capture mkdir "${logs}"
     capture mkdir "${outputs}"
+
+    global log_dir "${logs}/${today}"
+    capture mkdir "${log_dir}"
 }
 
 * ─── Open Log ────────────────────────────────────────────────────────────────
 cap log close module02
-log using "${logs}/02_string_cleaning_${today}.log", replace text name(module02)
+log using "${log_dir}/02_string_cleaning.log", replace text name(module02)
 
 di _n "{hline 70}"
 di "MODULE 02: String Cleaning"

@@ -45,11 +45,14 @@ if "${project_path}" == "" {
 
     capture mkdir "${logs}"
     capture mkdir "${outputs}"
+
+    global log_dir "${logs}/${today}"
+    capture mkdir "${log_dir}"
 }
 
 * ─── Open Log ────────────────────────────────────────────────────────────────
 cap log close module04
-log using "${logs}/04_outliers_flags_${today}.log", replace text name(module04)
+log using "${log_dir}/04_outliers_flags.log", replace text name(module04)
 
 di _n "{hline 70}"
 di "MODULE 04: Outliers and Flags"

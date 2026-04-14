@@ -3,9 +3,9 @@ PROJECT PROFILE - Automatic Initialization
 ================================================================================
 
 This file is automatically executed by Stata when running in batch mode from
-this directory. It sets up the project paths required for statacons builds.
+this directory. It sets up the project paths.
 
-Note: This file should be in the project root directory alongside SConstruct.
+Note: This file should be in the project root directory.
 
 ==============================================================================*/
 
@@ -36,7 +36,4 @@ if _rc == 0 {
     global logs "${project_path}/logs"
     global tables "${outputs}/tables"
     global figures "${outputs}/figures"
-
-    // Load project functions
-    capture do "${scripts}/functions.do"
 }

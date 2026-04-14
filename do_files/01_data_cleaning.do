@@ -46,11 +46,14 @@ if "${project_path}" == "" {
     capture mkdir "${logs}"
     capture mkdir "${outputs}"
     capture mkdir "${data}/intermediate"
+
+    global log_dir "${logs}/${today}"
+    capture mkdir "${log_dir}"
 }
 
 * ─── Open Log ────────────────────────────────────────────────────────────────
 cap log close module01
-log using "${logs}/01_data_cleaning_${today}.log", replace text name(module01)
+log using "${log_dir}/01_data_cleaning.log", replace text name(module01)
 
 di _n "{hline 70}"
 di "MODULE 01: Data Cleaning"

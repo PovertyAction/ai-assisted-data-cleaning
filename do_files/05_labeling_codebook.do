@@ -46,11 +46,14 @@ if "${project_path}" == "" {
     capture mkdir "${logs}"
     capture mkdir "${outputs}"
     capture mkdir "${data}/final"
+
+    global log_dir "${logs}/${today}"
+    capture mkdir "${log_dir}"
 }
 
 * ─── Open Log ────────────────────────────────────────────────────────────────
 cap log close module05
-log using "${logs}/05_labeling_codebook_${today}.log", replace text name(module05)
+log using "${log_dir}/05_labeling_codebook.log", replace text name(module05)
 
 di _n "{hline 70}"
 di "MODULE 05: Labeling and Codebook"
