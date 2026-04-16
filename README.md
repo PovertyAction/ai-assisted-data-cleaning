@@ -23,8 +23,13 @@ inside VS Code, built on top of the
 ### Prerequisites
 
 - Git ([download](https://git-scm.com/))
+- VSCode ([download](https://code.visualstudio.com/download))
+- GitHub Copilot Extension for VSCode([download](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot))
 - Stata 17+
-- VS Code with the [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) extension
+- Run the following command in your terminal to install just on windows:
+    - windows - `winget install Casey.Just`
+    - Linux - `brew install just`
+- Restart your terminal and proceed with the steps
 
 ### Steps
 
